@@ -5,6 +5,18 @@ public class RSAUtils {
     private static final SecureRandom rand = new SecureRandom();
     private static final BigInteger TWO = BigInteger.valueOf(2);
 
+    public static class KeyPair {
+        public BigInteger e, d, p, q, n;
+
+        public KeyPair(BigInteger e, BigInteger d, BigInteger p, BigInteger q) {
+            this.e = e;
+            this.d = d;
+            this.p = p;
+            this.q = q;
+            this.n = p.multiply(q);
+        }
+    }
+
     public static BigInteger modExp(BigInteger base, BigInteger exp, BigInteger mod) {
         BigInteger result = BigInteger.ONE;
         base = base.mod(mod);
@@ -107,22 +119,6 @@ public class RSAUtils {
         return new BigInteger[]{d, x, y};
     }
 
-    public static class KeyPair {
-        public BigInteger e, d, p, q;
-
-        public KeyPair(BigInteger e, BigInteger d, BigInteger p, BigInteger q) {
-            this.e = e;
-            this.d = d;
-            this.p = p;
-            this.q = q;
-        }
-
-        public BigInteger GetN() { //return n = p*q
-            return this.p.multiply(this.q);
-        }
-    }
-
-
     public static BigInteger modInverse(BigInteger e, BigInteger p, BigInteger q) {
         //decryption Key d is computed as e^-1 mod phi(n) (with encryption key e)
         //phi(n) is computed as (p-1)(q-1) => p and q are large prime numbers
@@ -135,4 +131,29 @@ public class RSAUtils {
         }
         return x;
     }
+
+    public static BigInteger modInverseWithPhi(BigInteger e, BigInteger phi) {
+        //version with phi already calculated, used in generateKeys
+        BigInteger[] result = extendedGCD(e, phi);
+        BigInteger x = result[1];
+
+        if (x.compareTo(BigInteger.ZERO) < 0) {
+            x = x.add(phi);
+        }
+        return x;
+    }
+
+    public static KeyPair generateKeys(BigInteger p, BigInteger q) {
+        //creates a random set of keys given 2 large prime numbers p and q, which
+        //would be generated using generatePrime()
+        BigInteger phi = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
+
+        BigInteger e;
+        do {
+            e = new BigInteger(p.bitCount()/2, rand);
+        } while (!gcd(e, phi).equals(BigInteger.ONE));
+
+        BigInteger d = modInverseWithPhi(e, phi);
+
+        return new KeyPair(e, d, p, q);
 }
