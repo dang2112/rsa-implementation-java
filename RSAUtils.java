@@ -81,4 +81,13 @@ public class RSAUtils {
             }
         }
     }
+
+    public static BigInteger gcd(BigInteger a, BigInteger b) {
+        while (!b.equals(BigInteger.ZERO)) {
+            BigInteger temp = b;
+            b = a.mod(b);
+            a = temp;
+        }
+        return a;
+    }
 }
