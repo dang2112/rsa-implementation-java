@@ -18,6 +18,7 @@ public class RSAUtils {
     }
 
     public static BigInteger modExp(BigInteger base, BigInteger exp, BigInteger mod) {
+        //fast modular exponentiation
         BigInteger result = BigInteger.ONE;
         base = base.mod(mod);
 
@@ -145,8 +146,9 @@ public class RSAUtils {
 
     public static KeyPair generateKeys(BigInteger p, BigInteger q) {
         //creates a random set of keys given 2 large prime numbers p and q, which
-        //would be generated using generatePrime()
+        //would be generated using generatePrime(); remember that p and q must not be equal
         BigInteger phi = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
+        //System.out.println("PHI VALUE   " + phi);
 
         BigInteger e;
         do {
@@ -156,4 +158,16 @@ public class RSAUtils {
         BigInteger d = modInverseWithPhi(e, phi);
 
         return new KeyPair(e, d, p, q);
+    }
+
+    public static BigInteger encrypt(BigInteger message, BigInteger e, BigInteger n) {
+        //remember: message must be less than n
+        //RSA encryption: c = m^e mod n
+        return modExp(message, e, n);
+    }
+
+    public static BigInteger decrypt(BigInteger cypher, BigInteger d, BigInteger n) {
+        //RSA decryption: m = c^d mod n
+        return modExp(cypher, d, n);
+    }
 }
