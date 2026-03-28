@@ -107,6 +107,22 @@ public class RSAUtils {
         return new BigInteger[]{d, x, y};
     }
 
+    public static class KeyPair {
+        public BigInteger e, d, p, q;
+
+        public KeyPair(BigInteger e, BigInteger d, BigInteger p, BigInteger q) {
+            this.e = e;
+            this.d = d;
+            this.p = p;
+            this.q = q;
+        }
+
+        public BigInteger GetN() { //return n = p*q
+            return this.p.multiply(this.q);
+        }
+    }
+
+
     public static BigInteger modInverse(BigInteger e, BigInteger p, BigInteger q) {
         //decryption Key d is computed as e^-1 mod phi(n) (with encryption key e)
         //phi(n) is computed as (p-1)(q-1) => p and q are large prime numbers
