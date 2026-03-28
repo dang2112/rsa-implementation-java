@@ -73,8 +73,8 @@ public class RSAUtils {
     public static BigInteger generatePrime(int bits) {
         while (true) {
             BigInteger candidate = new BigInteger(bits, rand);
-            candidate = candidate.setBit(bits - 1); // ensure size
-            candidate = candidate.setBit(0);        // make odd
+            candidate = candidate.setBit(bits - 1); //ensure size
+            candidate = candidate.setBit(0);        //make odd
 
             if (isProbablePrime(candidate, 20)) {
                 return candidate;
@@ -83,11 +83,40 @@ public class RSAUtils {
     }
 
     public static BigInteger gcd(BigInteger a, BigInteger b) {
+        //euclidean algorithm: GCD(a,b) = HCD(b,a mod b)
         while (!b.equals(BigInteger.ZERO)) {
             BigInteger temp = b;
             b = a.mod(b);
             a = temp;
         }
         return a;
+    }
+
+    public static BigInteger[] extendedGCD(BigInteger a, BigInteger b) {
+        //extended euclidean algorithm
+        if (b.equals(BigInteger.ZERO)) {
+            return new BigInteger[]{a, BigInteger.ONE, BigInteger.ZERO};
+        }
+
+        BigInteger[] vals = extendedGCD(b, a.mod(b));
+
+        BigInteger d = vals[0];
+        BigInteger x = vals[2];
+        BigInteger y = vals[1].subtract(a.divide(b).multiply(vals[2]));
+
+        return new BigInteger[]{d, x, y};
+    }
+
+    public static BigInteger modInverse(BigInteger e, BigInteger p, BigInteger q) {
+        //decryption Key d is computed as e^-1 mod phi(n) (with encryption key e)
+        //phi(n) is computed as (p-1)(q-1) => p and q are large prime numbers
+        BigInteger phi = (p.subtract(BigInteger.ONE)).multiply(q.subtract(BigInteger.ONE));
+        BigInteger[] result = extendedGCD(e, phi);
+        BigInteger x = result[1];
+
+        if (x.compareTo(BigInteger.ZERO) < 0) {
+            x = x.add(phi);
+        }
+        return x;
     }
 }
