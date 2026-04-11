@@ -1,9 +1,9 @@
 public static void main(String[] args) {
     //testing
-    BigInteger p = RSAUtils.generatePrime(12);
+    BigInteger p = RSAUtils.generatePrime(1024);
     BigInteger q; //ensure p is not equal to q
     do {
-        q = RSAUtils.generatePrime(12);
+        q = RSAUtils.generatePrime(1024);
     } while (q.equals(p));
     RSAUtils.KeyPair keys = RSAUtils.generateKeys(p, q);
 
