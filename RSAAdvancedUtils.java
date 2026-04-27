@@ -57,7 +57,7 @@ public class RSAAdvancedUtils {
     public static RSAUtils.KeyPair generateStrongKeys(int bits) {
         BigInteger p = generateSafePrime(bits);
         BigInteger q;
-        BigInteger minDiff = BigInteger.valueOf(2).pow(bits - 10);
+        BigInteger minDiff = BigInteger.valueOf(2).pow(bits - 10); //TODO: CAN NOT USE POWER FUNCTION
 
         // Đảm bảo khoảng cách p, q đủ lớn chống Fermat Factorization
         do {

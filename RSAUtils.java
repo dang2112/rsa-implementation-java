@@ -5,6 +5,9 @@ public class RSAUtils {
     private static final SecureRandom rand = new SecureRandom();
     private static final BigInteger TWO = BigInteger.valueOf(2);
 
+    // PKCS#1 v1.5 padding constants
+    private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes();
+
     public static class KeyPair {
         public BigInteger e, d, p, q, n;
 
@@ -169,5 +172,104 @@ public class RSAUtils {
     public static BigInteger decrypt(BigInteger cypher, BigInteger d, BigInteger n) {
         //RSA decryption: m = c^d mod n
         return modExp(cypher, d, n);
+    }
+
+    /**
+     * PKCS#1 v1.5 padding for encryption (EME-PKCS1-v1_5)
+     * Format: 00 || 02 || PS || 00 || M
+     * PS = pseudorandom, non-zero padding string, at least 8 bytes
+     */
+    public static byte[] paddingProc(BigInteger message, BigInteger e, BigInteger n) {
+        byte[] msgBytes = message.toByteArray();
+        int k = (n.bitLength() + 7) / 8; // byte length of modulus
+
+        if (msgBytes.length > k - 11) {
+            throw new IllegalArgumentException("Message too long for RSA encryption with PKCS#1 v1.5 padding");
+        }
+
+        // Build padded message: 00 || 02 || PS || 00 || M
+        byte[] padded = new byte[k];
+        padded[0] = 0x00;
+        padded[1] = 0x02;
+
+        int padLen = k - msgBytes.length - 3;
+        for (int i = 0; i < padLen; i++) {
+            byte r;
+            do {
+                r = (byte) rand.nextInt(256);
+            } while (r == 0);
+            padded[2 + i] = r;
+        }
+        padded[2 + padLen] = 0x00;
+        System.arraycopy(msgBytes, 0, padded, k - msgBytes.length, msgBytes.length);
+        return padded;
+    }
+
+    public static BigInteger encryptWithPadding(BigInteger message, BigInteger e, BigInteger n) {
+        byte[] padded = paddingProc(message, e, n);
+        BigInteger paddedMsg = new BigInteger(1, padded);
+        return modExp(paddedMsg, e, n);
+    }
+
+    /**
+     * Decrypt with PKCS#1 v1.5 padding
+     */
+    public static BigInteger decryptWithPadding(BigInteger cipher, BigInteger d, BigInteger n) {
+        BigInteger paddedMsg = modExp(cipher, d, n);
+        byte[] paddedBytes = paddedMsg.toByteArray();
+        int k = (n.bitLength() + 7) / 8;
+
+        if (paddedBytes.length > k) {
+            throw new IllegalArgumentException("Invalid padded message length");
+        }
+
+        // Find the 00 byte that separates padding from message
+        int sepIndex = -1;
+        for (int i = 2; i < paddedBytes.length; i++) {
+            if (paddedBytes[i] == 0x00) {
+                sepIndex = i;
+                break;
+            }
+        }
+
+        if (sepIndex == -1 || paddedBytes[sepIndex - 1] == 0x00) {
+            throw new IllegalArgumentException("Invalid PKCS#1 v1.5 padding");
+        }
+
+        byte[] msgBytes = new byte[paddedBytes.length - sepIndex - 1];
+        System.arraycopy(paddedBytes, sepIndex + 1, msgBytes, 0, msgBytes.length);
+        return new BigInteger(1, msgBytes);
+    }
+
+    /**
+     * PKCS#1 v1.5 padded decryption using CRT
+     */
+    public static BigInteger decryptWithPaddingCRT(BigInteger cipher, BigInteger p, BigInteger q, BigInteger d) {
+        BigInteger paddedMsg = RSAAdvancedUtils.decryptCRT(cipher, p, q, d);
+        byte[] paddedBytes = paddedMsg.toByteArray();
+        int k = (p.multiply(q).bitLength() + 7) / 8;
+
+        if (paddedBytes.length > k) {
+            throw new IllegalArgumentException("Invalid padded message length");
+        }
+
+        int start = 0;
+        if (paddedBytes[0] == 0x00) start = 1;
+
+        int sepIndex = -1;
+        for (int i = 2; i < paddedBytes.length; i++) {
+            if (paddedBytes[i] == 0x00) {
+                sepIndex = i;
+                break;
+            }
+        }
+
+        if (sepIndex == -1 || paddedBytes[sepIndex - 1] == 0x00) {
+            throw new IllegalArgumentException("Invalid PKCS#1 v1.5 padding");
+        }
+
+        byte[] msgBytes = new byte[paddedBytes.length - sepIndex - 1];
+        System.arraycopy(paddedBytes, sepIndex + 1, msgBytes, 0, msgBytes.length);
+        return new BigInteger(1, msgBytes);
     }
 }
