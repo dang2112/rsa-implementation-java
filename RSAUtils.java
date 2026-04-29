@@ -6,7 +6,7 @@ public class RSAUtils {
     private static final BigInteger TWO = BigInteger.valueOf(2);
 
     // PKCS#1 v1.5 padding constants
-    private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes();
+    //private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes();
 
     public static class KeyPair {
         public BigInteger e, d, p, q, n;
@@ -252,9 +252,6 @@ public class RSAUtils {
         if (paddedBytes.length > k) {
             throw new IllegalArgumentException("Invalid padded message length");
         }
-
-        int start = 0;
-        if (paddedBytes[0] == 0x00) start = 1;
 
         int sepIndex = -1;
         for (int i = 2; i < paddedBytes.length; i++) {
