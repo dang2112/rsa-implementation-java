@@ -33,7 +33,7 @@ public class RSAAdvancedUtils {
             if (isDivisible) continue; // Bỏ qua sinh số khác ngay
 
             // Gọi mượn hàm kiểm tra Miller-Rabin
-            if (RSAUtils.isProbablePrime(candidate, 20)) {
+            if (RSAUtils.isProbablePrime(candidate, 40)) {
                 return candidate;
             }
         }
@@ -47,7 +47,7 @@ public class RSAAdvancedUtils {
         do {
             q = generateFastPrime(bits - 1); // Gọi hàm SIÊU TỐC ở trên
             p = q.multiply(BigInteger.valueOf(2)).add(BigInteger.ONE);
-        } while (!RSAUtils.isProbablePrime(p, 20));
+        } while (!RSAUtils.isProbablePrime(p, 40));
         return p;
     }
 
