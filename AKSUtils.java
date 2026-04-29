@@ -47,7 +47,7 @@ public class AKSUtils {
 
         // Step 3: Check GCD
         for (int a = 2; a <= r; a++) {
-            BigInteger gcd = BigInteger.valueOf(a).gcd(n); //TODO: CAN NOT USE GCD
+            BigInteger gcd = RSAUtils.gcd(BigInteger.valueOf(a), n); //self implemented gcd
             if (gcd.compareTo(BigInteger.ONE) > 0 && gcd.compareTo(n) < 0) {
                 return false;
             }
@@ -79,7 +79,7 @@ public class AKSUtils {
         int maxB = n.bitLength();
         for (int b = 2; b <= maxB; b++) {
             BigInteger a = kthRoot(n, b);
-            if (a.pow(b).equals(n)) { //TODO: CAN NOT USE POW
+            if (RSAUtils.power(a, b).equals(n)) { //self implemented power
                 return true;
             }
         }
@@ -97,7 +97,7 @@ public class AKSUtils {
         BigInteger u = n;
         while (u.compareTo(s) < 0) {
             s = u;
-            u = u.multiply(kMinusOne).add(n.divide(u.pow(k - 1))).divide(kBig); //TODO
+            u = u.multiply(kMinusOne).add(n.divide(RSAUtils.power(u, k - 1))).divide(kBig); //self implemented power
         }
         return s;
     }

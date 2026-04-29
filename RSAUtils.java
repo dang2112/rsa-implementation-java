@@ -123,6 +123,16 @@ public class RSAUtils {
         return new BigInteger[]{d, x, y};
     }
 
+    public static BigInteger power(BigInteger a, int b) {
+        //just a helper to use power
+        //biginteger a to the power of int b
+        BigInteger result = BigInteger.valueOf(1);
+        for (int i = 0; i < b; i++) {
+            result = result.multiply(a);
+        }
+        return result;
+    }
+
     public static BigInteger modInverse(BigInteger e, BigInteger p, BigInteger q) {
         //decryption Key d is computed as e^-1 mod phi(n) (with encryption key e)
         //phi(n) is computed as (p-1)(q-1) => p and q are large prime numbers
