@@ -76,10 +76,10 @@ public class RSAAdvancedUtils {
             } while (!RSAUtils.gcd(e, phi).equals(BigInteger.ONE));
         }
 
-        // Gọi mượn hàm tính nghịch đảo từ code gốc của bạn
+        // Gọi mượn hàm tính nghịch đảo từ code gốc
         BigInteger d = RSAUtils.modInverseWithPhi(e, phi);
 
-        // Khởi tạo trực tiếp đối tượng KeyPair của nhóm bạn
+        // Khởi tạo trực tiếp đối tượng KeyPair
         return new RSAUtils.KeyPair(e, d, p, q);
     }
 
